@@ -62,3 +62,4 @@ app.listen(PORT, async () => {
     process.exit(1);
   }
 });
+try { app.use("/api", require("./routes/checkout_public")); } catch(e) { console.warn("[warn] checkout_public not mounted:", e?.message); }
