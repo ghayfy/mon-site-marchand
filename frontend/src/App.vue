@@ -15,7 +15,7 @@
         <button @click="checkout" style="margin-left:.5rem">Commander</button>
       </div>
     </header>
-    <section>
+    <section v-if="!$route.path.startsWith('/admin')">
       <h2 style="margin:0 0 1rem 0">Produits</h2>
       <div v-if="loading">Chargement…</div>
       <div v-else-if="error" style="color:#c00">{{ error }}</div>
@@ -28,6 +28,7 @@
       </ul>
       <p v-if="!loading && !error && products.length===0" style="color:#666">Aucun produit.</p>
     </section>
+<router-view v-else></router-view>
     <section style="margin-top:1.5rem">
       <h2 style="margin:0 0 .5rem 0">Panier</h2>
       <table v-if="cart.length" style="width:100%;border-collapse:collapse">
