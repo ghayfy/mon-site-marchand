@@ -2,6 +2,13 @@
   <div class="container" style="max-width:900px;margin:2rem auto;font-family:system-ui,-apple-system,Segoe UI,Roboto">
     <header style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
       <h1 style="margin:0">Mon Shop</h1>
+<nav style="display:flex;gap:.8rem;align-items:center">
+<a href="#/admin/orders">Admin Commandes</a>
+<a href="#/admin/products">Admin Catalogue</a>
+🛒 <strong>{{ cartCount }}</strong>
+<button @click="clearCart" style="margin-left:1rem">Vider</button>
+<button @click="checkout" style="margin-left:.5rem">Commander</button>
+</nav>
       <div>
         🛒 <strong>{{ cartCount }}</strong>
         <button @click="clearCart" style="margin-left:1rem">Vider</button>
