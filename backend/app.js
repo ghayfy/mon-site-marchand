@@ -63,3 +63,4 @@ app.listen(PORT, async () => {
   }
 });
 try { app.use("/api", require("./routes/checkout_public")); } catch(e) { console.warn("[warn] checkout_public not mounted:", e?.message); }
+try { app.use("/api", require("./routes/adminOrders_status")); } catch(e) { console.warn("[warn] adminOrders_status not mounted:", (e&&e.message)?e.message:e); }
