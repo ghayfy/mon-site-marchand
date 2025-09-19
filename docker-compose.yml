@@ -1,23 +1,25 @@
-version: "3.8"
 services:
   db:
-    image: postgres:15-alpine
+    image: mysql:8.0
     environment:
-      POSTGRES_USER: app
-      POSTGRES_PASSWORD: app
-      POSTGRES_DB: monshop
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: monshop
+      MYSQL_USER: app
+      MYSQL_PASSWORD: app
+    command: ["--default-authentication-plugin=mysql_native_password"]
     volumes:
-      - dbdata:/var/lib/postgresql/data
+      - db_data:/var/lib/mysql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U app -d monshop"]
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uapp -papp --silent"]
       interval: 5s
       timeout: 5s
-      retries: 10
+      retries: 20
+
   backend:
     build: ./backend
     environment:
       DB_HOST: db
-      DB_PORT: 5432
+      DB_PORT: 3306
       DB_USER: app
       DB_PASS: app
       DB_NAME: monshop
@@ -26,10 +28,12 @@ services:
     depends_on:
       db:
         condition: service_healthy
+
   frontend:
     build: ./frontend
     depends_on: [backend]
-    expose:
-      - "80"
+    ports:
+      - "8080:80"
+
 volumes:
-  dbdata:
+  db_data:
