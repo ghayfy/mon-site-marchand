@@ -1,5 +1,6 @@
 <template>
   <div class="wrap">
+    <div class="toolbar" style="justify-content:flex-end"><button @click="clearAuth(); location.reload()">Déconnexion admin</button></div>
     <h2>Catalogue</h2>
 
     <form class="toolbar" @submit.prevent="reload()">
@@ -48,6 +49,7 @@
 </template>
 
 <script setup>
+import { clearAuth } from "@/lib/adminAuth.js"
 import { ref, computed, onMounted } from 'vue'
 
 const items = ref([])

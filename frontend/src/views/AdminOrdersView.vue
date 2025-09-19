@@ -1,5 +1,6 @@
 <template>
   <div class="wrap">
+    <div class="toolbar" style="justify-content:flex-end"><button @click="clearAuth(); location.reload()">Déconnexion admin</button></div>
     <h2>Commandes</h2>
 
     <form class="toolbar" @submit.prevent="reload()">
@@ -73,6 +74,7 @@
 </template>
 
 <script setup>
+import { clearAuth } from "@/lib/adminAuth.js"
 import { ref, computed, onMounted } from 'vue'
 
 const items = ref([])
@@ -129,12 +131,20 @@ async function saveStatus(o) {
     savingId.value = null
   }
 }
-function exportFile(kind) {
-  const qs = new URLSearchParams({
-    ...(filters.value.status ? { status: filters.value.status } : {})
-  }).toString()
-  const url = `/api/admin/orders/export.${kind}${qs ? `?${qs}` : ''}`
-  window.open(url, '_blank')
+async function exportFile(kind) {
+  await ensureAuth();
+  const _h = getAuthHeader();
+  const qs = new URLSearchParams({ ...(filters.value.status ? { status: filters.value.status } : {}) }).toString()
+  const url = `/api/admin/orders/export.${kind}${qs ? `?${qs}` : ""}`
+  const r = await fetch(url, { headers: _h })
+  if (!r.ok) throw new Error(`HTTP ${r.status}`)
+  const blob = await r.blob()
+  const href = URL.createObjectURL(blob)
+  const a = document.createElement(a)
+  a.href = href
+  a.download = kind === csv ? orders.csv : orders.pdf
+  document.body.appendChild(a); a.click(); a.remove()
+  URL.revokeObjectURL(href)
 }
 onMounted(reload)
 </script>
