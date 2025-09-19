@@ -1,0 +1,8 @@
+# Remplace TON-DOMAINE.TLD par ton domaine
+TON-DOMAINE.TLD {
+  encode gzip
+  # API backend
+  reverse_proxy /api* backend:4000
+  # Frontend
+  reverse_proxy frontend:80
+}
