@@ -1,4 +1,5 @@
 import express from 'express';
+import { basicAuth } from './middleware/basicAuth.js'
 import cors from 'cors';
 import dotenv from 'dotenv';
 dotenv.config();
@@ -15,6 +16,9 @@ import checkoutRoutes from './routes/checkout.js';
 import paypalRoutes from './routes/paypal.js';
 
 const app = express();
+const ADMIN_USER = process.env.ADMIN_USER || "";
+const ADMIN_PASS = process.env.ADMIN_PASS || "";
+app.use("/api/admin", basicAuth(ADMIN_USER, ADMIN_PASS));
 app.use(cors());
 app.options('*', cors());
 app.options('*', cors());
