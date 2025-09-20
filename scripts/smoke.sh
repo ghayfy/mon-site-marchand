@@ -56,3 +56,12 @@ wget -qO- --header "Authorization: Basic $AUTH" http://127.0.0.1:4000/api/admin/
 ok "Backend intra-container OK"
 
 green "\n✔ SMOKE TESTS: TOUT OK"
+echo
+echo "▶ UTF-8 sanity"
+OUT=$(curl -fsS "http://$HOST:$PORT/api/products?limit=50" \
+  | jq -r '.[] | select(.sku=="MUG-LOGO" or .sku=="CAP-BLK") | .description' \
+  | paste -sd'|' -)
+case "$OUT" in
+  *"Ã"*|"null"|"") echo "✗ UTF-8 KO"; exit 1;;
+  *) echo "✓ UTF-8 OK";;
+esac
