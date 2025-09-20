@@ -3,9 +3,8 @@ services:
     environment:
       ADMIN_USER: admin
       ADMIN_PASS: ton-nouveau-mdp
-  backend:
     healthcheck:
-      test: ["CMD-SHELL", "wget -q --user=admin --password=ton-nouveau-mdp --auth-no-challenge -O- http://127.0.0.1:4000/api/admin/products?limit=1 >/dev/null"]
+      test: ["CMD-SHELL", "AUTH=$(printf 'admin:ton-nouveau-mdp' | base64); wget -q --header 'Authorization: Basic ${AUTH}' -O- http://127.0.0.1:4000/api/admin/products?limit=1 >/dev/null"]
       interval: 10s
       timeout: 5s
       retries: 5
