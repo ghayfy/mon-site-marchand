@@ -41,3 +41,15 @@ reset:
 
 show-tables:
 	docker compose exec -T db sh -lc 'MYSQL_PWD=app mysql -uapp -e "SHOW TABLES FROM monshop;"'
+
+.PHONY: migrate
+
+.PHONY: migrate
+	./scripts/migrate.sh
+migrate:
+	DB_NAME=monshop DB_USER=app DB_PASS=app ./scripts/migrate.sh
+
+.PHONY: migrate-fresh
+migrate-fresh:
+	docker compose exec -T db sh -lc 'MYSQL_PWD=app mysql -uapp -D monshop -e "DROP TABLE IF EXISTS __migrations;"'
+	DB_NAME=monshop DB_USER=app DB_PASS=app ./scripts/migrate.sh
