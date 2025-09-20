@@ -1,5 +1,10 @@
-.PHONY: up down logs smoke
-up:    ; docker compose up -d --build
-down:  ; docker compose down -v
-logs:  ; docker compose logs -f --tail=100
-smoke: ; ./scripts/smoke-v2.sh
+.PHONY: smoke up logs
+
+up:
+	docker compose up -d db backend frontend
+
+smoke:
+	HOST?=localhost PORT?=8080 ADMIN_PASS?=Cd6dJVO6 ./scripts/smoke.sh
+
+logs:
+	docker compose logs --no-color --tail=200 backend

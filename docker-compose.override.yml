@@ -1,19 +1,24 @@
 services:
   db:
-    # Force le serveur MySQL en utf8mb4/0900
-    command: [
-      "--character-set-server=utf8mb4",
-      "--collation-server=utf8mb4_0900_ai_ci"
-    ]
+    command: ["--character-set-server=utf8mb4","--collation-server=utf8mb4_0900_ai_ci"]
 
   backend:
     environment:
       ADMIN_USER: admin
-      ADMIN_PASS: ton-nouveau-mdp
-    # Healthcheck sans variable ${...}, header Basic inline (BusyBox OK)
+      ADMIN_PASS: Cd6dJVO6
     healthcheck:
-      test: ["CMD-SHELL", "wget -q --header 'Authorization: Basic $(printf admin:ton-nouveau-mdp | base64)' -O- http://127.0.0.1:4000/api/admin/products?limit=1 >/dev/null"]
+      test: ["CMD-SHELL", "wget -q --header 'Authorization: Basic $(printf admin:Cd6dJVO6 | base64)' -O- http://127.0.0.1:4000/api/admin/products?limit=1 >/dev/null"]
       interval: 10s
       timeout: 5s
       retries: 5
       start_period: 10s
+
+  frontend:
+    volumes:
+      - ./htpasswd_admin:/etc/nginx/htpasswd_admin:ro
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O- http://127.0.0.1/api/products?limit=1 >/dev/null"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
