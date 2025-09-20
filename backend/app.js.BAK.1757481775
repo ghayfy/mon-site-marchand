@@ -1,0 +1,59 @@
+import express from 'express';
+import cors from 'cors';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import sequelize from './config/db.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const app = express();
+app.use(cors({ origin: '*'}));
+app.use(express.json());
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+// Healthcheck
+app.get('/', async (_req, res) => {
+  try {
+    await sequelize.authenticate();
+    res.json({ status: 'ok', service: 'ecommerce-api', db: 'ok' });
+  } catch {
+    res.json({ status: 'ok', service: 'ecommerce-api', db: 'down' });
+  }
+});
+
+// petit helper pour monter les routes sans faire planter si un fichier manque
+async function tryMount(prefix, file) {
+  try {
+    const mod = await import(file);
+    app.use(prefix, mod.default || mod);
+    console.log(`Mounted ${prefix} from ${file}`);
+  } catch (e) {
+    console.log(`Route file not found or failed: ${file} (${e.message})`);
+  }
+}
+
+// Boot DB (sync déjà géré dans config/db.js, on ne force rien ici)
+try {
+  await sequelize.authenticate();
+  console.log('DB connected & synced');
+} catch (e) {
+  console.log('DB boot error:', e.message);
+}
+
+// Routes
+await tryMount('/api/auth', './routes/auth.js');
+await tryMount('/api/addresses', './routes/addresses.js');
+await tryMount('/api/categories', './routes/categories.js');
+await tryMount('/api/products', './routes/products.js');
+await tryMount('/api/coupons', './routes/coupons.js');
+await tryMount('/api/checkout', './routes/checkout.js');
+await tryMount('/api/cart', './routes/cart.js'); // <- IMPORTANT
+
+// 404 JSON par défaut
+app.use((_req, res) => res.status(404).json({ error: 'Not found' }));
+
+const port = process.env.PORT || 4000;
+app.listen(port, '0.0.0.0', () => {
+  console.log(`API listening on http://0.0.0.0:${port}`);
+});
