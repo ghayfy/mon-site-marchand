@@ -1,10 +1,12 @@
 services:
-  frontend:
-    ports:
-      - "8080:80"
-    volumes:
-      - ./frontend/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
   backend:
-    volumes:
-      - ./backend/routes:/app/routes
-      - ./backend/app.js:/app/app.js:ro
+    environment:
+      ADMIN_USER: admin
+      ADMIN_PASS: ton-nouveau-mdp
+  backend:
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --user=admin --password=ton-nouveau-mdp --auth-no-challenge -O- http://127.0.0.1:4000/api/admin/products?limit=1 >/dev/null"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
