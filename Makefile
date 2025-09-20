@@ -1,10 +1,9 @@
-
 HOST ?= localhost
 PORT ?= 8080
-ADMIN_PASS ?= Cd6dJVO6
 ADMIN_USER ?= admin
+ADMIN_PASS ?= Cd6dJVO6
 
-.PHONY: up smoke logs
+.PHONY: up smoke logs db-dump db-restore-last seed reset
 
 up:
 	docker compose up -d db backend frontend
@@ -15,7 +14,17 @@ smoke:
 logs:
 	docker compose logs --no-color --tail=200 backend
 
-.PHONY: seed reset
+db-dump:
+	mkdir -p backups
+	docker compose exec -T db sh -lc 'mysqldump -uapp -papp monshop' > "backups/monshop_$$(date +%F_%H%M%S).sql"
+	@ls -1t backups/monshop_*.sql | head -n1 | xargs -I{} echo "Dump => {}"
+
+db-restore-last:
+	@F=$$(ls -1t backups/monshop_*.sql 2>/dev/null | head -n1); \
+	[ -n "$$F" ] || (echo "Aucun dump"; exit 1); \
+	echo "Restore $$F"; \
+	docker compose exec -T db sh -lc "mysql -uapp -papp monshop" < "$$F"
+
 seed:
 	docker compose exec -T db sh -lc "mysql -uapp -papp -D monshop < /dev/stdin" < scripts/seed.sql
 
