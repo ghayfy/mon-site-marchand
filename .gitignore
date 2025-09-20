@@ -7,3 +7,4 @@ dist/
 .env
 /tmp/*.csv
 /tmp/*.pdf
+htpasswd_admin
