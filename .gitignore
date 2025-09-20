@@ -8,3 +8,9 @@ dist/
 /tmp/*.csv
 /tmp/*.pdf
 htpasswd_admin
+
+.env
+.env.*
+htpasswd_admin
+backups/*.sql
+*.DS_Store
