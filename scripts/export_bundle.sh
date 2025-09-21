@@ -6,7 +6,23 @@ set -euo pipefail
 : "${STATUS:=}"
 : "${DATE_FROM:=}"
 : "${DATE_TO:=}"
+: "${AUTO_UP:=1}"
+: "${WAIT_SECS:=60}"
 mkdir -p "$OUTDIR" dist
+if [[ "${AUTO_UP}" = "1" ]]; then
+  if command -v docker >/dev/null 2>&1 && docker compose version >/dev/null 2>&1; then
+    docker compose up -d db backend >/dev/null 2>&1 || true
+  fi
+fi
+echo "[0/4] Attente backend (${BASE})…"
+ok=0
+for _ in $(seq 1 "${WAIT_SECS}"); do
+  if curl -s -o /dev/null "${BASE}/" || curl -s -o /dev/null "${BASE}"; then
+    ok=1; break
+  fi
+  sleep 1
+done
+[[ "$ok" = "1" ]] || { echo "Backend indisponible sur ${BASE} après ${WAIT_SECS}s"; exit 1; }
 curl_api() {
   local url="$1"; shift || true
   if [[ -n "${TOKEN:-}" ]]; then
