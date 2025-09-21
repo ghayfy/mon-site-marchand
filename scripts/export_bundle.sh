@@ -9,6 +9,7 @@ set -euo pipefail
 : "${DATE_TO:=}"
 : "${AUTO_UP:=1}"
 : "${WAIT_SECS:=120}"
+: "${BACKEND_PORT:=4000}"
 mkdir -p "$OUTDIR" dist
 dc() {
   if command -v docker >/dev/null 2>&1 && docker compose version >/dev/null 2>&1; then
@@ -24,28 +25,36 @@ if [[ "${AUTO_UP}" = "1" ]]; then
     dc up -d db backend >/dev/null 2>&1 || true
   fi
 fi
+cid=""
 if dc version >/dev/null 2>&1; then
   cid="$(dc ps -q backend || true)"
-  if [[ -n "${cid}" ]]; then
-    echo "[0/4] Attente HEALTH=healthy (backend)…"
+fi
+if [[ -n "${cid}" ]]; then
+  echo "[0/4] Check backend (health/ports)…"
+  status="$(docker inspect -f '{{if .State.Health}}{{.State.Health.Status}}{{else}}none{{end}}' "${cid}" 2>/dev/null || echo none)"
+  if [[ "${status}" != "none" ]]; then
     t=0
-    while :; do
-      status="$(docker inspect -f '{{if .State.Health}}{{.State.Health.Status}}{{else}}none{{end}}' "${cid}" 2>/dev/null || echo none)"
-      [[ "${status}" = "healthy" ]] && break
-      [[ "${status}" = "starting" || "${status}" = "none" ]] || true
-      t=$((t+1))
-      if (( t >= WAIT_SECS )); then
-        echo "Timeout: backend non healthy (${status}) après ${WAIT_SECS}s"
-        exit 1
-      fi
+    while [[ "${status}" != "healthy" && $t -lt ${WAIT_SECS} ]]; do
       sleep 1
+      t=$((t+1))
+      status="$(docker inspect -f '{{if .State.Health}}{{.State.Health.Status}}{{else}}none{{end}}' "${cid}" 2>/dev/null || echo none)"
     done
-    if [[ "${BASE_AUTO}" = "1" ]]; then
-      hp="$(dc port backend 4000 2>/dev/null || true)"
-      if [[ -n "${hp}" ]]; then
-        host="${hp%:*}"
-        port="${hp##*:}"
-        [[ "${host}" = "0.0.0.0" ]] && host="localhost"
+    [[ "${status}" = "healthy" ]] || echo "Avertissement: backend health=${status} (on continue sur attente TCP)"
+  fi
+  if [[ "${BASE_AUTO}" = "1" ]]; then
+    hp="$(dc port backend "${BACKEND_PORT}" 2>/dev/null || true)"
+    if [[ -z "${hp}" ]]; then
+      hostip="$(docker inspect -f "{{with (index .NetworkSettings.Ports \"${BACKEND_PORT}/tcp\")}}{{(index . 0).HostIp}}{{end}}" "${cid}" 2>/dev/null || true)"
+      hostport="$(docker inspect -f "{{with (index .NetworkSettings.Ports \"${BACKEND_PORT}/tcp\")}}{{(index . 0).HostPort}}{{end}}" "${cid}" 2>/dev/null || true)"
+      if [[ -n "${hostport}" ]]; then
+        hp="${hostip:-0.0.0.0}:${hostport}"
+      fi
+    fi
+    if [[ -n "${hp}" ]]; then
+      host="${hp%:*}"
+      port="${hp##*:}"
+      [[ "${host}" = "0.0.0.0" || -z "${host}" ]] && host="localhost"
+      if [[ -n "${port}" && "${port}" != "0" ]]; then
         BASE="http://${host}:${port}"
       fi
     fi
