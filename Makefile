@@ -53,3 +53,19 @@ migrate:
 migrate-fresh:
 	docker compose exec -T db sh -lc 'MYSQL_PWD=app mysql -uapp -D monshop -e "DROP TABLE IF EXISTS __migrations;"'
 	DB_NAME=monshop DB_USER=app DB_PASS=app ./scripts/migrate.sh
+
+.PHONY: admin-pass
+admin-pass:
+	@ADMIN_PASS="$(PASS)" ./scripts/admin-pass.sh
+
+.PHONY: check
+check:
+	HOST=localhost PORT=8080 ADMIN_PASS=$(or $(PASS),Cd6dJVO6) ./scripts/smoke.sh
+
+.PHONY: admin-pass
+admin-pass:
+	@ADMIN_PASS="$(PASS)" ./scripts/admin-pass.sh
+
+.PHONY: check
+check:
+	HOST=localhost PORT=8080 ADMIN_PASS=$(or $(PASS),Cd6dJVO6) ./scripts/smoke.sh
