@@ -1,4 +1,4 @@
-import adminOrdersDb from "./routes/adminOrders_db.js";import checkoutPublic from "./routes/checkoutPublic.js";import authPublic from "./routes/authPublic.js";
+import adminOrdersExport from "./routes/adminOrders_export.js";import adminOrdersDb from "./routes/adminOrders_db.js";import checkoutPublic from "./routes/checkoutPublic.js";import authPublic from "./routes/authPublic.js";
 import meRoute from "./routes/me.js";import express from 'express';
 import { basicAuth } from './middleware/basicAuth.js'
 import cors from 'cors';
@@ -73,3 +73,4 @@ app.listen(PORT, async () => {
 try { app.use("/api", require("./routes/checkout_public")); } catch(e) { console.warn("[warn] checkout_public not mounted:", e?.message); }
 try { app.use("/api", require("./routes/adminOrders_status")); } catch(e) { console.warn("[warn] adminOrders_status not mounted:", (e&&e.message)?e.message:e); }
 app.get('/health',(req,res)=>res.status(200).send('OK'))
+app.use("/api", adminOrdersExport);
