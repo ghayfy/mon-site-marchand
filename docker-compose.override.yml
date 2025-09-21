@@ -1,13 +1,14 @@
 services:
   db:
-    command: ["--character-set-server=utf8mb4","--collation-server=utf8mb4_0900_ai_ci"]
+    command:
+      - "--character-set-server=utf8mb4"
+      - "--collation-server=utf8mb4_0900_ai_ci"
 
   backend:
     environment:
-      JWT_SECRET: change-me-please-32-bytes-min
-    environment:
       ADMIN_USER: admin
       ADMIN_PASS: Cd6dJVO6
+      JWT_SECRET: change-me-please-32-bytes-min
     healthcheck:
       test: ["CMD-SHELL", "wget -q --header 'Authorization: Basic $(printf admin:Cd6dJVO6 | base64)' -O- http://127.0.0.1:4000/api/admin/products?limit=1 >/dev/null"]
       interval: 10s
@@ -18,9 +19,3 @@ services:
   frontend:
     volumes:
       - ./htpasswd_admin:/etc/nginx/htpasswd_admin:ro
-    healthcheck:
-      test: ["CMD-SHELL", "wget -q -O- http://127.0.0.1/api/products?limit=1 >/dev/null"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 5s

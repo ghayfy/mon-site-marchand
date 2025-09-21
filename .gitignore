@@ -14,3 +14,5 @@ htpasswd_admin
 htpasswd_admin
 backups/*.sql
 *.DS_Store
+backups/
+/dc
