@@ -1,6 +1,8 @@
 import express from 'express';
 import mysql from 'mysql2/promise';
+
 const router = express.Router();
+
 async function getPool() {
   return await mysql.createPool({
     host: process.env.DB_HOST || 'db',
@@ -12,33 +14,39 @@ async function getPool() {
     namedPlaceholders: true
   });
 }
+
 function csvEscape(v) {
   if (v == null) return '';
   const s = String(v);
   return /[",\n]/.test(s) ? `"${s.replace(/"/g,'""')}"` : s;
 }
+
 async function fetchOrder(conn, id) {
   const [oRows] = await conn.query(
     `SELECT id, total_t_t_c AS total_ttc, currency, status, provider, created_at, updated_at
      FROM orders WHERE id=?`, [id]
   );
   if (oRows.length === 0) return null;
+
   const [iRows] = await conn.query(
     `SELECT title, qty, price_h_t, tva
      FROM order_items WHERE order_id=? ORDER BY id`, [id]
   );
   return { order: oRows[0], items: iRows };
 }
+
 async function sendCsvForOrder(req, res, idRaw) {
   const oid = Number.parseInt(idRaw, 10);
   if (!Number.isFinite(oid) || oid <= 0) {
     return res.status(400).json({ error: 'invalid id' });
   }
+
   const pool = await getPool();
   const conn = await pool.getConnection();
   try {
     const data = await fetchOrder(conn, oid);
     if (!data) return res.status(404).json({ error: 'order not found' });
+
     const { order, items } = data;
     const lines = [];
     lines.push('order_id,total_ttc,currency,status,provider,created_at,updated_at');
@@ -69,13 +77,15 @@ async function sendCsvForOrder(req, res, idRaw) {
     conn.release();
   }
 }
+
 router.get('/admin/orders/export.csv', (req, res) => {
   return sendCsvForOrder(req, res, req.query.id);
 });
-router.get('/admin/orders/:id(\d+)/export.csv', (req, res) => {
+router.get('/admin/orders/:id(\\d+)/export.csv', (req, res) => {
   return sendCsvForOrder(req, res, req.params.id);
 });
-router.get('/admin/orders/:id(\d+)\.csv', (req, res) => {
+router.get('/admin/orders/:id(\\d+)\\.csv', (req, res) => {
   return sendCsvForOrder(req, res, req.params.id);
 });
+
 export default router;
