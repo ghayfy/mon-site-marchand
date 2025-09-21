@@ -4,6 +4,8 @@ services:
 
   backend:
     environment:
+      JWT_SECRET: change-me-please-32-bytes-min
+    environment:
       ADMIN_USER: admin
       ADMIN_PASS: Cd6dJVO6
     healthcheck:

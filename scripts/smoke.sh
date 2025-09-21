@@ -65,3 +65,16 @@ case "$OUT" in
   *"Ã"*|"null"|"") echo "✗ UTF-8 KO"; exit 1;;
   *) echo "✓ UTF-8 OK";;
 esac
+
+echo
+step "Auth client JWT"
+code=$(curl -s -o /dev/null -w '%{http_code}' -H 'Content-Type: application/json' \
+  -d '{"email":"user@example.com","password":"motdepasse"}' \
+  "http://${HOST}:${PORT}/api/auth/login") || true
+[[ "$code" == "200" ]] || fail "login 200 attendu, reçu $code"
+TOKEN=$(curl -fsS -H 'Content-Type: application/json' \
+  -d '{"email":"user@example.com","password":"motdepasse"}' \
+  "http://${HOST}:${PORT}/api/auth/login" | jq -r .token)
+code=$(curl -s -o /dev/null -w '%{http_code}' -H "Authorization: Bearer $TOKEN" "http://${HOST}:${PORT}/api/me") || true
+[[ "$code" == "200" ]] || fail "/api/me 200 attendu, reçu $code"
+ok "JWT login + /me OK"

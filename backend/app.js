@@ -1,4 +1,5 @@
-import express from 'express';
+import authPublic from "./routes/authPublic.js";
+import meRoute from "./routes/me.js";import express from 'express';
 import { basicAuth } from './middleware/basicAuth.js'
 import cors from 'cors';
 import dotenv from 'dotenv';
@@ -41,6 +42,8 @@ app.use('/api/auth', authRoutes);
 app.use('/api/addresses', addressesRoutes);
 app.use('/api/categories', categoriesRoutes);
 app.use('/api/products', productsRoutes);
+app.use("/api/auth", authPublic);
+app.use("/api", meRoute);
 app.use('/api/coupons', couponsRoutes);
 app.use('/api/cart', cartRoutes);
 app.use('/api/checkout', checkoutRoutes);
