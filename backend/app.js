@@ -42,6 +42,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/addresses', addressesRoutes);
 app.use('/api/categories', categoriesRoutes);
 app.use('/api/products', productsRoutes);
+app.use("/api", adminOrdersExport);
 app.use("/api", adminOrdersDb);
 app.use("/api", checkoutPublic);app.use("/api/auth", authPublic);
 app.use("/api", meRoute);
@@ -55,7 +56,6 @@ import adminCatalogRoutes from "./routes/adminCatalog.js";
 import adminOrdersRoutes  from "./routes/adminOrders.js";
 
 app.use(adminCatalogRoutes);
-app.use("/api", adminOrdersExport);
 app.use(adminOrdersRoutes);
 // __ADMIN_ROUTES_INSERTED__
 app.use((req, res) => res.status(404).json({ error: 'Not found' }));
