@@ -42,7 +42,6 @@ app.use('/api/auth', authRoutes);
 app.use('/api/addresses', addressesRoutes);
 app.use('/api/categories', categoriesRoutes);
 app.use('/api/products', productsRoutes);
-app.use("/api", adminOrdersExport);
 app.use("/api", adminOrdersDb);
 app.use("/api", checkoutPublic);app.use("/api/auth", authPublic);
 app.use("/api", meRoute);
@@ -74,3 +73,4 @@ app.listen(PORT, async () => {
 try { app.use("/api", require("./routes/checkout_public")); } catch(e) { console.warn("[warn] checkout_public not mounted:", e?.message); }
 try { app.use("/api", require("./routes/adminOrders_status")); } catch(e) { console.warn("[warn] adminOrders_status not mounted:", (e&&e.message)?e.message:e); }
 app.get('/health',(req,res)=>res.status(200).send('OK'))
+app.use("/api", adminOrdersExport);
