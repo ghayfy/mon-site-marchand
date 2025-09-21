@@ -66,4 +66,5 @@ async function sendCsvForOrder(_req, res, id) {
 }
 router.get('/admin/orders/:id(\\d+)/export.csv', (req, res) => sendCsvForOrder(req, res, req.params.id));
 router.get('/admin/orders/:id(\\d+)\\.csv',       (req, res) => sendCsvForOrder(req, res, req.params.id));
+router.get('/admin/orders/export.csv', (req,res)=>sendCsvForOrder(req,res,req.query.id));
 export default router;
