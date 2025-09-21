@@ -55,6 +55,7 @@ import adminCatalogRoutes from "./routes/adminCatalog.js";
 import adminOrdersRoutes  from "./routes/adminOrders.js";
 
 app.use(adminCatalogRoutes);
+app.use("/api", adminOrdersExport);
 app.use(adminOrdersRoutes);
 // __ADMIN_ROUTES_INSERTED__
 app.use((req, res) => res.status(404).json({ error: 'Not found' }));
@@ -73,4 +74,3 @@ app.listen(PORT, async () => {
 try { app.use("/api", require("./routes/checkout_public")); } catch(e) { console.warn("[warn] checkout_public not mounted:", e?.message); }
 try { app.use("/api", require("./routes/adminOrders_status")); } catch(e) { console.warn("[warn] adminOrders_status not mounted:", (e&&e.message)?e.message:e); }
 app.get('/health',(req,res)=>res.status(200).send('OK'))
-app.use("/api", adminOrdersExport);
