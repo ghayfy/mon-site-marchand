@@ -49,6 +49,7 @@ async function sendCsvForOrder(req,res,id){
     res.status(200).send(csv);
   } finally { conn.release(); }
 }
-router.get('/admin/orders/:id(\d+)/export.csv', (req,res)=>sendCsvForOrder(req,res,req.params.id));
-router.get('/admin/orders/:id(\d+)\.csv',       (req,res)=>sendCsvForOrder(req,res,req.params.id));
+export default router;
+router.get('/admin/orders/:id(\\d+)/export.csv', (req,res)=>sendCsvForOrder(req,res,req.params.id));
+router.get('/admin/orders/:id(\\d+)\\.csv',       (req,res)=>sendCsvForOrder(req,res,req.params.id));
 export default router;
