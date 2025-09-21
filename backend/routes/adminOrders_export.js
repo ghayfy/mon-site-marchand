@@ -67,4 +67,18 @@ async function sendCsvForOrder(_req, res, id) {
 router.get('/admin/orders/:id(\\d+)/export.csv', (req, res) => sendCsvForOrder(req, res, req.params.id));
 router.get('/admin/orders/:id(\\d+)\\.csv',       (req, res) => sendCsvForOrder(req, res, req.params.id));
 router.get('/admin/orders/export.csv', (req,res)=>sendCsvForOrder(req,res,req.query.id));
+// PDF minimal valide (stub)
+router.get('/admin/orders/export.pdf', (req,res)=>{
+  const pdf='%PDF-1.4\n1 0 obj<<>>endobj\n2 0 obj<<>>endobj\n3 0 obj<</Type/Catalog/Pages 2 0 R>>endobj\n4 0 obj<</Type/Page/Parent 2 0 R/MediaBox[0 0 300 100]/Contents 5 0 R/Resources<</Font<</F1 6 0 R>>>>>>endobj\n5 0 obj<</Length 55>>stream\nBT /F1 12 Tf 72 60 Td (Export PDF non impl\\303\\251ment\\303\\251) Tj ET\nendstream endobj\n6 0 obj<</Type/Font/Subtype/Type1/BaseFont/Helvetica>>endobj\nxref\n0 7\n0000000000 65535 f \n0000000010 00000 n \n0000000041 00000 n \n0000000070 00000 n \n0000000119 00000 n \n0000000240 00000 n \n0000000352 00000 n \ntrailer<</Size 7/Root 3 0 R>>\nstartxref\n445\n%%EOF\n';
+  res.setHeader('Content-Type','application/pdf');
+  res.setHeader('Content-Disposition','attachment; filename="order.pdf"');
+  res.status(200).send(pdf);
+});
+router.get('/admin/orders/:id(\\d+)/export.pdf', (req,res)=>{
+  // même PDF minimal; on pourrait plus tard générer un vrai reçu avec l'ID
+  const pdf='%PDF-1.4\n1 0 obj<<>>endobj\n2 0 obj<<>>endobj\n3 0 obj<</Type/Catalog/Pages 2 0 R>>endobj\n4 0 obj<</Type/Page/Parent 2 0 R/MediaBox[0 0 300 100]/Contents 5 0 R/Resources<</Font<</F1 6 0 R>>>>>>endobj\n5 0 obj<</Length 70>>stream\nBT /F1 12 Tf 40 60 Td (Order ID: '+req.params.id+') Tj ET\nendstream endobj\n6 0 obj<</Type/Font/Subtype/Type1/BaseFont/Helvetica>>endobj\nxref\n0 7\n0000000000 65535 f \n0000000010 00000 n \n0000000041 00000 n \n0000000070 00000 n \n0000000119 00000 n \n0000000250 00000 n \n0000000362 00000 n \ntrailer<</Size 7/Root 3 0 R>>\nstartxref\n455\n%%EOF\n';
+  res.setHeader('Content-Type','application/pdf');
+  res.setHeader('Content-Disposition','attachment; filename="order_'+req.params.id+'.pdf"');
+  res.status(200).send(pdf);
+});
 export default router;
