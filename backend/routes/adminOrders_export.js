@@ -25,64 +25,57 @@ async function fetchOrder(conn, id) {
   if (oRows.length === 0) return null;
   const [iRows] = await conn.query(
     `SELECT title, qty, price_h_t, tva
-       FROM order_items WHERE order_id=? ORDER BY id`, [id]
+     FROM order_items WHERE order_id=? ORDER BY id`, [id]
   );
-  return { order:oRows[0], items:iRows };
+  return { order: oRows[0], items: iRows };
 }
-async function sendCsvForOrder(req, res, rawId) {
-  const pick = (o, ks)=>{ for (const k of ks) if (o && o[k]!=null && o[k]!=="") return String(o[k]); return undefined; };
-  const fromParams = pick(req.params, ["id"]);
-  const fromQuery  = pick(req.query,  ["id","order_id","oid","orderId"]);
-  const chosen = (rawId ?? fromParams ?? fromQuery ?? "").trim();
-  const oid = Number.parseInt(chosen, 10);
+async function sendCsvForOrder(req, res, idRaw) {
+  const oid = Number.parseInt(idRaw, 10);
   if (!Number.isFinite(oid) || oid <= 0) {
-    return res.status(400).json({ error: "invalid id" });
+    return res.status(400).json({ error: 'invalid id' });
   }
   const pool = await getPool();
   const conn = await pool.getConnection();
   try {
     const data = await fetchOrder(conn, oid);
-    if (!data) return res.status(404).json({ error: "order not found" });
+    if (!data) return res.status(404).json({ error: 'order not found' });
     const { order, items } = data;
     const lines = [];
-    lines.push("order_id,total_ttc,currency,status,provider,created_at,updated_at");
+    lines.push('order_id,total_ttc,currency,status,provider,created_at,updated_at');
     lines.push([
       csvEscape(order.id),
       csvEscape(order.total_ttc),
       csvEscape(order.currency),
       csvEscape(order.status),
-      csvEscape(order.provider ?? ""),
+      csvEscape(order.provider ?? ''),
       csvEscape(order.created_at?.toISOString?.() ?? order.created_at),
       csvEscape(order.updated_at?.toISOString?.() ?? order.updated_at),
-    ].join(","));
-    lines.push("");
-    lines.push("title,qty,price_h_t,tva");
+    ].join(','));
+    lines.push('');
+    lines.push('title,qty,price_h_t,tva');
     for (const it of items) {
       lines.push([
         csvEscape(it.title),
         csvEscape(it.qty),
         csvEscape(it.price_h_t),
         csvEscape(it.tva),
-      ].join(","));
+      ].join(','));
     }
-    const csv = lines.join("\n") + "\n";
-    res.setHeader("Content-Type", "text/csv; charset=utf-8");
-    res.setHeader("Content-Disposition", `attachment; filename="order_${oid}.csv"`);
-    return res.status(200).send(csv);
+    const csv = lines.join('\n') + '\n';
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', `attachment; filename="order_${oid}.csv"`);
+    res.status(200).send(csv);
   } finally {
     conn.release();
   }
 }
-router.get('/admin/orders/export.csv', (req, res) => sendCsvForOrder(req, res));
-router.get('/admin/orders/:id/export.csv', (req, res) => sendCsvForOrder(req, res));
-router.get('/admin/orders/:id.csv', (req, res) => sendCsvForOrder(req, res));
-router.get('/admin/orders/export.pdf', (_req, res) => {
-  res.type('application/pdf').status(200).send('%PDF-1.4\n% Export PDF non implémenté\n');
+router.get('/admin/orders/export.csv', (req, res) => {
+  return sendCsvForOrder(req, res, req.query.id);
 });
-router.get('/admin/orders/:id/export.pdf', (_req, res) => {
-  res.type('application/pdf').status(200).send('%PDF-1.4\n% Export PDF non implémenté\n');
+router.get('/admin/orders/:id(\d+)/export.csv', (req, res) => {
+  return sendCsvForOrder(req, res, req.params.id);
 });
-router.get('/admin/orders/:id.pdf', (_req, res) => {
-  res.type('application/pdf').status(200).send('%PDF-1.4\n% Export PDF non implémenté\n');
+router.get('/admin/orders/:id(\d+)\.csv', (req, res) => {
+  return sendCsvForOrder(req, res, req.params.id);
 });
 export default router;
