@@ -17,3 +17,6 @@ backups/*.sql
 backups/
 /dc
 frontend/htpasswd_admin
+
+# local backup junk
+*.bak.*
